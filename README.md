@@ -1,2 +1,2 @@
-# RISD_ID_FALL17_IOT
-Course repository for RISD ID FALL17 Special Topic Internet of Trees
+# RISD_ID_FALL16_IOT
+Course repository for RISD ID FALL16 Special Topic Internet of Trees
