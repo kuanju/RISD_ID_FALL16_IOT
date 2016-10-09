@@ -23,7 +23,7 @@ Adafruit_WINC1500 WiFi(WINC_CS, WINC_IRQ, WINC_RST);
 
 
 
-char ssid[] = "your network ssid";     //  your network SSID (name)
+char ssid[] = "your ssid";     //  your network SSID (name)
 char pass[] = "your password";  // your network password
 
 int keyIndex = 0;                // your network key Index number (needed only for WEP)
@@ -40,6 +40,11 @@ char server[] = "maker.ifttt.com";    // domain name for test page (using DNS)
 // with the IP address and port of the server
 // that you want to connect to (port 80 is default for HTTP, 443 for HTTPS):
 Adafruit_WINC1500SSLClient client;
+
+//Timer variable
+unsigned long currentTime = 0;
+unsigned long lastSensorCheckTime = 0;
+
 
 // define your sensor pin 
 int buttonPin = 12;
@@ -105,12 +110,15 @@ void loop() {
 //  Serial.println(buttonState);
   
   /************* update data to ifttt when the switch is triggered ***********/
-  
-  
-  if (buttonState == 0){
+
+  currentTime = millis();
+
+  //only allow the trigger happens every 5 second.
+  if (buttonState == 0 && lastSensorCheckTime-currentTime > 5000){
 
     Serial.println("sensor triggered.");
     updateIFTTT(buttonState);
+    lastSensorCheckTime = currentTime;
   }
 
 
