@@ -23,10 +23,8 @@ Adafruit_WINC1500 WiFi(WINC_CS, WINC_IRQ, WINC_RST);
 
 
 
-//char ssid[] = "RISD-MiscDevices";     //  your network SSID (name)
-//char pass[] = "T3chn0l0gy!";  // your network password
-char ssid[] = "usagi";     //  your network SSID (name)
-char pass[] = "2008505505";  // your network password
+char ssid[] = "RISD-MiscDevices";     //  your network SSID (name)
+char pass[] = "T3chn0l0gy!";  // your network password
 
 int keyIndex = 0;                // your network key Index number (needed only for WEP)
 
