@@ -1,26 +1,3 @@
-
-/*
-  Web client
-
- This sketch connects to a website (http://www.adafruit.com)
- using a WINC1500
-
- This example is written for a network using WPA encryption. For
- WEP or WPA, change the Wifi.begin() call accordingly.
-
- This example is written for a network using WPA encryption. For
- WEP or WPA, change the Wifi.begin() call accordingly.
-
- * Circuit:
- * - Feather M0 WiFi (WINC1500), WiFi 101 shield, or WINC1500 Breakout
-
- created 13 July 2010
- by dlf (Metodo2 srl)
- modified 31 May 2012
- by Tom Igoe
- */
-
-
 #include <SPI.h>
 #include <Adafruit_WINC1500.h>
 
@@ -45,8 +22,12 @@ Adafruit_WINC1500 WiFi(WINC_CS, WINC_IRQ, WINC_RST);
 //Adafruit_WINC1500 WiFi;
 
 
+
+//char ssid[] = "RISD-MiscDevices";     //  your network SSID (name)
+//char pass[] = "T3chn0l0gy!";  // your network password
 char ssid[] = "usagi";     //  your network SSID (name)
-char pass[] = "2008505505";    // your network password (use for WPA, or use as key for WEP)
+char pass[] = "2008505505";  // your network password
+
 int keyIndex = 0;                // your network key Index number (needed only for WEP)
 
 int status = WL_IDLE_STATUS;
@@ -54,7 +35,7 @@ int status = WL_IDLE_STATUS;
 // use the numeric IP instead of the name for the server:
 //IPAddress server(141,101,112,175);  // numeric IP for test page (no DNS)
 char server[] = "maker.ifttt.com";    // domain name for test page (using DNS)
-#define webpage "/trigger/sensor_alert/with/key/bf4WpDjyhOFn8Ue6MvpA_m"  // path to test page
+#define webpage "/trigger/switch_detected/with/key/dY61k0AtTbt2D293AhfiAm"  // path to test page
 
 
 // Initialize the Ethernet client library
@@ -62,19 +43,32 @@ char server[] = "maker.ifttt.com";    // domain name for test page (using DNS)
 // that you want to connect to (port 80 is default for HTTP, 443 for HTTPS):
 Adafruit_WINC1500SSLClient client;
 
+// define your sensor pin 
+int buttonPin = 12;
+int buttonState = 1;
+int sensorPin = A0;
+int sensorState = 0;
+
 
 void setup() {
-#ifdef WINC_EN
-  pinMode(WINC_EN, OUTPUT);
-  digitalWrite(WINC_EN, HIGH);
-#endif
+/************ Sensor Setup ***************/
+//Put your sensor setup her:
+pinMode(buttonPin, INPUT_PULLUP);
 
+
+/************ Initialize serial and wait for port to open *****/
+  Serial.begin(9600);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
 
-  //Initialize serial and wait for port to open:
-  Serial.begin(9600);
+/************ establishing connection to internet ***********/
+
+//Enabling the wifi module
+#ifdef WINC_EN
+  pinMode(WINC_EN, OUTPUT);
+  digitalWrite(WINC_EN, HIGH);
+#endif
 
   Serial.println("WINC1500 Web client test");
 
@@ -84,8 +78,8 @@ void setup() {
     // don't continue:
     while (true);
   }
-
-  // attempt to connect to Wifi network:
+  
+// attempt to connect to Wifi network:
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(ssid);
@@ -103,8 +97,47 @@ void setup() {
   Serial.println("Connected to wifi");
   printWifiStatus();
 
-/*******************************/
+}
 
+void loop() {
+
+  /************* Reading sensor Data ***********/
+  buttonState = digitalRead (buttonPin);
+//  Serial.print("buttonState: ");
+//  Serial.println(buttonState);
+  
+  /************* update data to ifttt when the switch is triggered ***********/
+  
+  
+  if (buttonState == 0){
+
+    Serial.println("sensor triggered.");
+    updateIFTTT(buttonState);
+  }
+
+
+
+/************ Check wifi connection status *******/
+  while (WiFi.status() != WL_CONNECTED) {
+    
+    Serial.print("Lost wifi connection, ");
+    Serial.println("Attempting to connect to SSID: ");
+    Serial.println(ssid);
+    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
+    status = WiFi.begin(ssid, pass);
+
+    // wait 10 seconds for connection:
+    uint8_t timeout = 10;
+    while (timeout && (WiFi.status() != WL_CONNECTED)) {
+      timeout--;
+      delay(1000);
+    }
+  }
+
+  
+}
+
+void updateIFTTT(int sensorVal){
   Serial.println("\nStarting connection to server...");
   // if you get a connection, report back via serial:
   if (client.connect(server, 443)) {
@@ -120,8 +153,10 @@ void setup() {
     client.println("Connection: close");
     
     client.println("Content-Type: application/json");
+
+    String val1 = String(sensorVal);
     
-    String json = "{\"value1\":\"cccc\"}";
+    String json = "{\"value1\":\""+val1+"\"}";
     Serial.println(json);
     Serial.println(json.length());
     
@@ -131,38 +166,27 @@ void setup() {
 
     client.println(json);
   }
-}
 
-void loop() {
+  delay(1000);
+
+  Serial.println("waiting for confirmation...");
+
   // if there are incoming bytes available
   // from the server, read them and print them:
   while (client.available()) {
     char c = client.read();
     Serial.write(c);
   }
-
-  // if the server's disconnected, stop the client:
-  if (!client.connected()) {
-    Serial.println();
-    Serial.println("disconnecting from server.");
-    client.stop();
-
-    // do nothing forevermore:
-    while (true);
-  }
 }
-
 
 void printWifiStatus() {
   // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());
-
   // print your WiFi shield's IP address:
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
   Serial.println(ip);
-
   // print the received signal strength:
   long rssi = WiFi.RSSI();
   Serial.print("signal strength (RSSI):");
