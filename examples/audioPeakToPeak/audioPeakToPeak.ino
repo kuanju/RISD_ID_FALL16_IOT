@@ -1,13 +1,23 @@
+#include <Adafruit_NeoPixel.h>
+
 /****************************************
 Example Sound Level Sketch
 ****************************************/
  
 const int sampleWindow = 50; // Sample window width in mS (50 mS = 20Hz)
 unsigned int sample;
- 
+
+#define PIN            6
+// How many NeoPixels are attached to the Arduino?
+#define NUMPIXELS      100
+
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
 void setup() 
 {
    Serial.begin(9600);
+     pixels.begin(); // This initializes the NeoPixel library.
+
 }
  
  
@@ -41,4 +51,29 @@ void loop()
 //   Serial.println(volts);
 
   Serial.println(peakToPeak);
+ 
+  if(peakToPeak>10){
+    int color = map(peakToPeak,0,1024,0,255);
+    
+    for(int i=0;i<NUMPIXELS;i++){
+
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+
+    pixels.setPixelColor(i, pixels.Color(color,0,0)); // Moderately bright green color.
+
+    pixels.show(); // This sends the updated pixel color to the hardware.
+
+    }
+  }else{
+    for(int i=0;i<NUMPIXELS;i++){
+
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+
+    pixels.setPixelColor(i, pixels.Color(0,0,0)); // Moderately bright green color.
+
+    pixels.show(); // This sends the updated pixel color to the hardware.
+
+  }
+  }
+  delay(10);
 }

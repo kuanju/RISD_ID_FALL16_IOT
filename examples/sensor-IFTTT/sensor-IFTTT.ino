@@ -23,8 +23,8 @@ Adafruit_WINC1500 WiFi(WINC_CS, WINC_IRQ, WINC_RST);
 
 
 
-char ssid[] = "your ssid";     //  your network SSID (name)
-char pass[] = "your password";  // your network password
+char ssid[] = "RISD-MiscDevices";     //  your network SSID (name)
+char pass[] = "T3chn0l0gy!";  // your network password
 
 int keyIndex = 0;                // your network key Index number (needed only for WEP)
 
@@ -56,7 +56,7 @@ int sensorState = 0;
 void setup() {
 /************ Sensor Setup ***************/
 //Put your sensor setup her:
-pinMode(buttonPin, INPUT_PULLUP);
+//pinMode(buttonPin, INPUT_PULLUP);
 
 
 /************ Initialize serial and wait for port to open *****/
@@ -105,7 +105,7 @@ pinMode(buttonPin, INPUT_PULLUP);
 void loop() {
 
   /************* Reading sensor Data ***********/
-  buttonState = digitalRead (buttonPin);
+//  buttonState = digitalRead (buttonPin);
 //  Serial.print("buttonState: ");
 //  Serial.println(buttonState);
   
@@ -114,7 +114,7 @@ void loop() {
   currentTime = millis();
 
   //only allow the trigger happens every 5 second.
-  if (buttonState == 0 && lastSensorCheckTime-currentTime > 5000){
+  if (buttonState == 0 && currentTime-lastSensorCheckTime > 5000){
 
     Serial.println("sensor triggered.");
     updateIFTTT(buttonState);
